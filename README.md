@@ -55,9 +55,8 @@ This is essential as it will allow you to create your free cluster in the next s
 
 ## 2. Get the source code
 
-[Clone this repo](https://github.com/1154046/Streaming-Data-with-Apache-Kafka/edit/master/README.md)
+Open a new Terminal and [Clone this repo](https://github.com/1154046/Streaming-Data-with-Apache-Kafka/)
 
-Open a new Terminal.
 
 Clone the source code:
 
@@ -132,19 +131,19 @@ We're using the Reactive Messaging Flowable to send a random number every second
 
 The @Outgoing annotation is used to mark this method as something that sends to the configured channel. This class is marked with the @ApplicationScoped annotation so that it can be used with Quarkus CDI. This also allows it to be discovered by the plumbing provided by the Quarkus Reactive Messaging Kafka plugin. We define that in the pom.xml like so:
 
-`
+```
   <dependency>
     <groupId>io.quarkus</groupId>
     
     <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
   </dependency>
-`
+```
 
 ### Receiving messages
 
 Now open up WindSpeedConverter and have a look at the process method:
 
-`
+```
   @Incoming("windSpeed")
 
   @Outgoing("windSpeedMph")
@@ -155,7 +154,7 @@ Now open up WindSpeedConverter and have a look at the process method:
 
     return windSpeedinKph * KphToMph;
   }
-`
+```
 
 You can see we're using two annotations, @Incoming and @Outgoing with corresponding channel names. This method takes inputs from windSpeed and outputs to windSpeedMph, hence it is tranforming the data and re-broadcasting it. 
 
@@ -167,7 +166,7 @@ We setup periodic sending to the windSpeedKph channel but this receiver is liste
 Open up this file to see how we've configured Kafka to be used in our Quarkus project:
 Streaming-Data-with-Apache-Kafka-Quicklab/src/main/resources/application.properties
 
-`
+```
   # Outgoing
   mp.messaging.outgoing.windSpeedKph.connector=smallrye-kafka
   mp.messaging.outgoing.windSpeedKph.topic=windSpeed
@@ -175,7 +174,7 @@ Streaming-Data-with-Apache-Kafka-Quicklab/src/main/resources/application.propert
   # Incoming
   mp.messaging.incoming.windSpeed.connector=smallrye-kafka
   mp.messaging.incoming.windSpeed.value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
-`
+```
 
 Now you should be able to connect the dots from the windSpeedKph channel to the windSpeed channel (and intermediate windspeed Kafka topic). Instead of using an in-memory channel, this configuration sets up Kafka as the messaging provider (along with the inclusion of the Quarkus-Kafka messaging dependency/JAR file we mentioned above)
 
@@ -192,7 +191,7 @@ Streaming-Data-with-Apache-Kafka-Quicklab/src/main/java/org/acme/WindSpeedResour
 
 And look at the stream method:
 
-`
+```
   @Inject
   @Channel("windSpeedMph") Publisher<Double> windSpeed;
   @GET
@@ -203,7 +202,7 @@ And look at the stream method:
   public Publisher<Double> stream() {
     return windSpeed;
   }
-`
+```
 
 We @Inject the @Channel called windSpeedMph into this method in the variable windSpeed. The remainder of the annotations setups a HTTP endpoint with @Path("/stream") that @Produces(MediaType.SERVER_SENT_EVENTS) and responds to a @GET request. This class has a @Path("/windSpeed")
 
@@ -226,7 +225,7 @@ We're going to create a new in-memory channel windSpeedManual to send a message 
 
 The @Path("/generate/{speed}") is where we can invoke this routine. Add this code to the appropriate places in the WindSpeedResource.java file.
 
-`
+```
   import org.eclipse.microprofile.reactive.messaging.Channel;
   import org.eclipse.microprofile.reactive.messaging.Emitter;
   import org.jboss.resteasy.annotations.SseElementType;
@@ -244,14 +243,15 @@ The @Path("/generate/{speed}") is where we can invoke this routine. Add this cod
     windSpeedEmitter.send(speed);
     return Response.status(Response.Status.CREATED).entity(speed).build();
   }
-`
+```
 
 ### Consume a message from Kafka
 
 Once we have the above setup, we can receive the in-memory message from the @Incoming("windSpeedManual") channel and send it out over the @Outgoing("windSpeedKph") so it can be processed with the other messages already moving through the system (that we setup in the periodic message sender previously).
 
-`
-  Add this code to WindGenerator.java
+Add this code to WindGenerator.java
+
+```
   import org.eclipse.microprofile.reactive.messaging.Incoming;
   import org.eclipse.microprofile.reactive.messaging.Outgoing;
   ....
@@ -260,7 +260,7 @@ Once we have the above setup, we can receive the in-memory message from the @Inc
   public Integer generateManual(int windSpeedManual) {
   return windSpeedManual;
   }
-`
+```
 
 ### Send a message using HTTP
 Everything is setup and ready to go! Send a message by invoking the HTTP endpoint using a curl command line so:
