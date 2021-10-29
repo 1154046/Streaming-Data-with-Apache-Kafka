@@ -144,8 +144,11 @@ The @Outgoing annotation is used to mark this method as something that sends to 
 
 `
   <dependency>
+
     <groupId>io.quarkus</groupId>
+    
     <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+  
   </dependency>
 `
 
@@ -154,7 +157,6 @@ The @Outgoing annotation is used to mark this method as something that sends to 
 Now open up WindSpeedConverter and have a look at the process method:
 
 `
-
 @Incoming("windSpeed")
 
 @Outgoing("windSpeedMph")
@@ -166,7 +168,6 @@ public double process(int windSpeedinKph) {
   return windSpeedinKph * KphToMph;
 
 }
-
 `
 
 
